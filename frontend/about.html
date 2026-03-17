@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Waste-AI | About</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <nav class="modern-navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <h2><i class="fas fa-recycle"></i> Waste-<span class="brand-accent">AI</span></h2>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="home.html" class="nav-link">Home</a></li>
+        <li><a href="upload.html" class="nav-link">Upload</a></li>
+        <li><a href="history.html" class="nav-link">History</a></li>
+        <li><a href="settings.html" class="nav-link">Settings</a></li>
+        <li><a href="about.html" class="nav-link active">About</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="card">
+      <h1>About Waste-AI</h1>
+      <p>Waste-AI is a lightweight AI assistant to identify the waste type (organic, recyclable, hazardous, general) from a photo and provide disposal advice. It's perfect for hackathons and prototypes — built with a PyTorch model & Flask backend, and an HTML/CSS/JS frontend.</p>
+
+      <div class="grid">
+        <div>
+          <h3>Why this matters</h3>
+          <p>Correct sorting reduces landfill, improves recycling yields and keeps hazardous waste out of municipal streams. This tool helps everyday users quickly know where to dispose an item.</p>
+
+          <h3>How it works (high-level)</h3>
+          <ol>
+            <li>User uploads a photo from the web UI.</li>
+            <li>Front-end sends image to Flask <code>/predict</code> endpoint.</li>
+            <li>Backend runs the PyTorch model and returns the class and advice.</li>
+            <li>Front-end displays the result and optionally saves to history.</li>
+          </ol>
+        </div>
+
+        <aside class="credits">
+          <h4>Project</h4>
+          <p><strong>Waste-AI</strong></p>
+          <p>Author: Muskan (You)</p>
+          <p>Stack: Flask • PyTorch • HTML/CSS/JS</p>
+          <p><a class="link" href="#" target="_blank">GitHub repo</a></p>
+          <p style="margin-top:12px"><small>Made for sustainability. Good luck with your hackathon!</small></p>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3><i class="fas fa-recycle"></i> Waste-AI</h3>
+          <p>Smart waste classification for a sustainable future</p>
+        </div>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="settings.html">Settings</a>
+          <a href="history.html">History</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Waste-AI. Built for Sustainability <i class="fas fa-globe"></i></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Waste-AI | Settings</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <nav class="modern-navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <h2><i class="fas fa-recycle"></i> Waste-<span class="brand-accent">AI</span></h2>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="home.html" class="nav-link">Home</a></li>
+        <li><a href="upload.html" class="nav-link">Upload</a></li>
+        <li><a href="history.html" class="nav-link">History</a></li>
+        <li><a href="settings.html" class="nav-link active">Settings</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="settings-section">
+      <div class="card">
+      <h1><i class="fas fa-cog"></i> Settings</h1>
+
+      <form id="profileForm" autocomplete="off">
+        <label class="settings-label">Full name</label>
+        <input type="text" id="name" placeholder="Full name" class="settings-input" />
+
+        <label class="settings-label">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" class="settings-input" />
+
+        <label class="settings-label">Phone</label>
+        <input type="tel" id="phone" placeholder="+91 9xxxxxxxxx" class="settings-input" />
+
+        <div style="display:flex;gap:10px;align-items:center;margin-top:20px">
+          <button type="button" id="saveProfile" class="btn">Save Profile</button>
+          <button type="button" id="logoutBtn" class="btn logout">Logout</button>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const userKey = "user";
+    const darkKey = "darkModeEnabled";
+
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const phoneInput = document.getElementById("phone");
+    const saveBtn = document.getElementById("saveProfile");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    function loadProfile() {
+      const raw = localStorage.getItem(userKey);
+      if (!raw) return;
+      try {
+        const u = JSON.parse(raw);
+        nameInput.value = u.name || "";
+        emailInput.value = u.email || "";
+        phoneInput.value = u.phone || "";
+      } catch(e){}
+    }
+
+    saveBtn.addEventListener("click", () => {
+      const u = { name: nameInput.value.trim(), email: emailInput.value.trim(), phone: phoneInput.value.trim() };
+      localStorage.setItem(userKey, JSON.stringify(u));
+      alert("✅ Profile saved locally");
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      if (!confirm("Log out?")) return;
+      localStorage.removeItem(userKey);
+      window.location.href = "login.html";
+    });
+
+
+    loadProfile();
+  </script>
+</body>
+</html>

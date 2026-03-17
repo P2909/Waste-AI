@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waste-AI | Upload & Classify</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <nav class="modern-navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <h2><i class="fas fa-recycle"></i> Waste-<span class="brand-accent">AI</span></h2>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="home.html" class="nav-link">Home</a></li>
+        <li><a href="upload.html" class="nav-link active">Upload</a></li>
+        <li><a href="history.html" class="nav-link">History</a></li>
+        <li><a href="settings.html" class="nav-link">Settings</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <div class="card">
+        <div class="upload-header text-center mb-4">
+          <h1><i class="fas fa-camera"></i> Upload Waste Image</h1>
+          <p>Drag and drop your image or click to browse</p>
+        </div>
+
+        <!-- Drag and Drop Area -->
+        <div id="drop-area" class="drop-zone">
+          <div class="drop-content">
+            <i class="fas fa-cloud-upload-alt drop-icon"></i>
+            <h3>Drop your image here</h3>
+            <p>or <span class="browse-link">browse files</span></p>
+            <div class="supported-formats">
+              <small>Supports: JPG, PNG, GIF, WebP</small>
+            </div>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" hidden />
+        </div>
+
+        <!-- Image Preview -->
+        <div id="preview-container" class="preview-container" style="display: none;">
+          <div class="preview-header">
+            <h3><i class="fas fa-image"></i> Image Preview</h3>
+            <button id="remove-image" class="btn btn-secondary btn-sm">
+              <i class="fas fa-times"></i> Remove
+            </button>
+          </div>
+          <img id="preview" alt="Preview" class="preview-image">
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-container" class="loading-container" style="display: none;">
+          <div class="loading-spinner">
+            <div class="loading"></div>
+          </div>
+          <p>Analyzing your image with AI...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="result-container" class="result-container" style="display: none;">
+          <div class="result-header">
+            <h3><i class="fas fa-check-circle"></i> Classification Result</h3>
+          </div>
+          
+          <div class="result-content">
+            <div class="prediction-card">
+              <div class="prediction-type">
+                <span class="type-label">Waste Type:</span>
+                <span id="predicted-class" class="type-value"></span>
+              </div>
+              <div class="confidence-bar">
+                <div class="confidence-fill" id="confidence-fill"></div>
+              </div>
+              <div class="confidence-text">
+                <span id="confidence-text">95% confidence</span>
+              </div>
+            </div>
+
+            <div class="advice-card">
+              <h4><i class="fas fa-lightbulb"></i> Disposal Advice</h4>
+              <p id="advice" class="advice-text"></p>
+            </div>
+
+            <div class="environmental-impact">
+              <h4><i class="fas fa-leaf"></i> Environmental Impact</h4>
+              <div id="impact-info" class="impact-content"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="upload-actions">
+          <button id="classify-btn" class="btn btn-primary btn-large" style="display: none;">
+            <i class="fas fa-brain"></i>
+            Classify Image
+          </button>
+          <button id="upload-another" class="btn btn-secondary" style="display: none;">
+            <i class="fas fa-plus"></i>
+            Upload Another
+          </button>
+        </div>
+
+        <!-- Extra Info -->
+        <div id="extra-info" class="extra-info" style="display: none;">
+          <h3><i class="fas fa-map-marker-alt"></i> Disposal Centers Near You</h3>
+          <div class="info-cards">
+            <div class="info-card">
+              <i class="fas fa-recycle"></i>
+              <div>
+                <h4>Recycling Centers</h4>
+                <p>Find nearby recycling facilities</p>
+                <a href="https://www.google.com/maps/search/recycling+centers+near+me/" target="_blank" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-external-link-alt"></i> View on Maps
+                </a>
+              </div>
+            </div>
+            <div class="info-card">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div>
+                <h4>Hazardous Waste</h4>
+                <p>Special disposal requirements</p>
+                <a href="https://www.google.com/maps/search/hazardous+waste+disposal+near+me/" target="_blank" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-external-link-alt"></i> Find Centers
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const fileInput = document.getElementById("fileInput");
+    const dropArea = document.getElementById("drop-area");
+    const preview = document.getElementById("preview");
+    const previewContainer = document.getElementById("preview-container");
+    const loadingContainer = document.getElementById("loading-container");
+    const resultContainer = document.getElementById("result-container");
+    const extraInfo = document.getElementById("extra-info");
+    const classifyBtn = document.getElementById("classify-btn");
+    const uploadAnotherBtn = document.getElementById("upload-another");
+    const removeImageBtn = document.getElementById("remove-image");
+    
+    const predictedClassSpan = document.getElementById("predicted-class");
+    const adviceSpan = document.getElementById("advice");
+    const confidenceFill = document.getElementById("confidence-fill");
+    const confidenceText = document.getElementById("confidence-text");
+    const impactInfo = document.getElementById("impact-info");
+
+    let currentFile = null;
+
+    // Drag and Drop Events
+    dropArea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropArea.classList.add("drag-over");
+    });
+
+    dropArea.addEventListener("dragleave", () => {
+      dropArea.classList.remove("drag-over");
+    });
+
+    dropArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropArea.classList.remove("drag-over");
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFile(files[0]);
+      }
+    });
+
+    // Click to browse
+    dropArea.addEventListener("click", () => {
+      fileInput.click();
+    });
+
+    // File input change
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    // Classify button
+    classifyBtn.addEventListener("click", () => {
+      if (currentFile) {
+        classifyImage(currentFile);
+      }
+    });
+
+    // Upload another button
+    uploadAnotherBtn.addEventListener("click", () => {
+      resetUpload();
+    });
+
+    // Remove image button
+    removeImageBtn.addEventListener("click", () => {
+      resetUpload();
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file.");
+        return;
+      }
+
+      currentFile = file;
+      
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+        previewContainer.style.display = "block";
+        classifyBtn.style.display = "inline-flex";
+        dropArea.style.display = "none";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function classifyImage(file) {
+      // Show loading state
+      loadingContainer.style.display = "block";
+      previewContainer.style.display = "none";
+      classifyBtn.style.display = "none";
+
+      // Send to Flask backend
+      const formData = new FormData();
+      formData.append("file", file);
+
+      fetch("http://127.0.0.1:5001/predict", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        loadingContainer.style.display = "none";
+        
+        if (data.prediction) {
+          displayResults(data);
+        } else {
+          throw new Error(data.error || "Classification failed");
+        }
+      })
+      .catch(err => {
+        loadingContainer.style.display = "none";
+        previewContainer.style.display = "block";
+        classifyBtn.style.display = "inline-flex";
+        alert("⚠️ Error: " + err.message);
+      });
+    }
+
+    function displayResults(data) {
+      const prediction = data.prediction.toLowerCase();
+      
+      // Update prediction
+      predictedClassSpan.textContent = prediction.charAt(0).toUpperCase() + prediction.slice(1);
+      
+      // Set confidence (simulate 85-95% for demo)
+      const confidence = Math.floor(Math.random() * 11) + 85;
+      confidenceFill.style.width = confidence + "%";
+      confidenceText.textContent = confidence + "% confidence";
+      
+      // Set advice
+      let advice = "";
+      let impact = "";
+      
+      switch (prediction) {
+        case "organic":
+          advice = "Dispose in a compost bin or organic waste collection. This material can be composted to create nutrient-rich soil. 🌱";
+          impact = "Composting reduces methane emissions and creates valuable fertilizer for plants.";
+          break;
+        case "recyclable":
+          advice = "Place in the recycling bin. Make sure it's clean and dry before recycling. ♻️";
+          impact = "Recycling conserves natural resources and reduces energy consumption by up to 95%.";
+          break;
+        case "hazardous":
+          advice = "Take to a hazardous waste collection center. Do not dispose in regular trash or down drains. ⚠️";
+          impact = "Proper disposal prevents soil and water contamination and protects public health.";
+          break;
+        case "general":
+          advice = "Dispose in general waste bin. Consider if items can be reused or repurposed before disposal. 🗑️";
+          impact = "Reducing general waste helps minimize landfill usage and environmental impact.";
+          break;
+      }
+      
+      adviceSpan.textContent = advice;
+      impactInfo.innerHTML = `<p>${impact}</p>`;
+      
+      // Show results
+      resultContainer.style.display = "block";
+      extraInfo.style.display = "block";
+      uploadAnotherBtn.style.display = "inline-flex";
+    }
+
+    function resetUpload() {
+      currentFile = null;
+      fileInput.value = "";
+      preview.src = "";
+      previewContainer.style.display = "none";
+      loadingContainer.style.display = "none";
+      resultContainer.style.display = "none";
+      extraInfo.style.display = "none";
+      classifyBtn.style.display = "none";
+      uploadAnotherBtn.style.display = "none";
+      dropArea.style.display = "block";
+    }
+
+    // Initialize
+    resetUpload();
+  </script>
+</body>
+</html>

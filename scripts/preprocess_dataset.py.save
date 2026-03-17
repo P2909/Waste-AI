@@ -1,0 +1,68 @@
+# scripts/preprocess_dataset.py
+import os, shutil
+from pathlib import Path
+from PIL import Image
+from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+
+PROJECT = Path(__file__).resolve().parents[1]
+RAW = PROJECT/"data/raw/delhi"
+OUT = PROJECT/"data/processed"
+IMG_SIZE = (224, 224)
+TEST_SIZE = 0.2
+RNG = 42
+
+def prepare():
+    print("📁 PROJECT:", PROJECT)
+    print("📂 RAW:", RAW, "exists?", RAW.exists())
+    if not RAW.exists():
+        print("❌ RAW dataset not found."); return
+
+    if OUT.exists(): shutil.rmtree(OUT)
+    for split in ["train","val","test"]:
+        (OUT/split).mkdir(parents=True, exist_ok=True)
+
+    classes = [d.name for d in RAW.iterdir() if d.is_dir()]
+    print("📦 classes:", classes)
+
+    totals = {}
+    for cls in classes:
+        src = RAW/cls
+        imgs = [p for p in src.iterdir() if p.suffix.lower() in [".jpg",".jpeg",".png",".webp"]]
+        print(f"\n➡️ {cls}: {len(imgs)} images")
+        if not imgs: continue
+
+        train, temp = train_test_split(imgs, test_size=0.3, random_state=RNG)
+val, test = train_test_split(temp, test_size=0.5, random_state=RNG)
+
+for split_name, batch in [("train", train), ("val", val), ("test", test)]:
+    (OUT/split_name/cls).mkdir(parents=True, exist_ok=True)
+
+            for p in tqdm(batch, desc=f"{cls} -> {split_name}"):
+                try:
+                    im = Image.open(p).convert("RGB").resize(IMG_SIZE)
+                    im.save(OUT/split_name/cls/p.name)
+                except Exception as e:
+                    print("   ⚠️", p.name, e)
+
+        totals[cls] = (len(train), len(test))
+
+    print("\n📊 split summary:")
+    for cls,(tr,te) in totals.items():
+        print(f"   {cls}: train={tr} test={te}")
+
+    print("\n✅ preprocessing done. output:", OUT)
+
+if __name__ == "__main__":
+    print("🚀 starting preprocess...")
+    prepare()
+
+
+
+
+
+
+
+
+
+

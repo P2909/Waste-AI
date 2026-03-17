@@ -1,0 +1,102 @@
+
+from torchvision import models, transforms
+from PIL import Image
+import os
+
+# same classes as training
+class_names = ["general", "organic", "recyclable", "hazardous"]
+
+# 🔹 Load model (full checkpoint)
+print("📂 Loading model...")
+model = models.resnet18(pretrained=False)
+model.fc = torch.nn.Linear(model.fc.in_features, len(class_names))
+
+# 👇 Make sure this matches your model filename
+model.load_state_dict(torch.load("/Users/muskan/projects/waste-ai/models/waste_classifier.pth", map_location="cpu"))
+model.eval()
+print("✅ Model loaded")
+
+# 🔹 Preprocess
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406],
+                         [0.229, 0.224, 0.225])
+])
+
+def predict(img_path):
+    print(f"🖼️ Loading image: {img_path}")
+    if not os.path.exists(img_path):
+        print("❌ Image not found!")
+        return None
+    image = Image.open(img_path).convert("RGB")
+    tensor = transform(image).unsqueeze(0)  # add batch dimension
+    outputs = model(tensor)
+    _, pred = torch.max(outputs, 1)
+    return class_names[pred.item()]
+
+if __name__ == "__main__":
+    # 👇 Change this path to any image that exists in your dataset
+    test_img = "/Users/muskan/projects/waste-ai/data/raw/delhi/recyclable/000003.jpg"
+
+    print("🚀 Running prediction...")
+    result = predict(test_img)
+    if result:
+        print("✅ Prediction:", result)
+
+# demo_predict.py
+import tensorflow as tf
+from tensorflow.keras.preprocessing import image
+import numpy as np
+import os
+from pathlib import Path
+
+# ------------------------
+# Paths
+# ------------------------
+PROJECT = Path(__file__).resolve().parents[1]
+MODEL_PATH = PROJECT / "models/waste_classifier.h5"
+IMG_SIZE = (224, 224)
+
+# ------------------------
+# Load model
+# ------------------------
+print("📂 Loading trained model...")
+model = tf.keras.models.load_model(MODEL_PATH)
+print("✅ Model loaded!")
+
+# ------------------------
+# Predict function
+# ------------------------
+def predict(img_path, class_names):
+    print(f"🖼️ Loading image: {img_path}")
+    if not os.path.exists(img_path):
+        print("❌ Image not found!")
+        return None
+
+    # Load & preprocess image
+    img = image.load_img(img_path, target_size=IMG_SIZE)
+    img_array = image.img_to_array(img) / 255.0   # normalize
+    img_array = np.expand_dims(img_array, axis=0) # batch dimension
+
+    # Run prediction
+    predictions = model.predict(img_array)
+    pred_idx = np.argmax(predictions[0])
+    return class_names[pred_idx]
+
+# ------------------------
+# Run demo prediction
+# ------------------------
+if __name__ == "__main__":
+    # 👇 Change this path to any image from your dataset
+    test_img = "/Users/muskan/projects/waste-ai/data/raw/delhi/recyclable/000003.jpg"
+
+    # Rebuild class names from training
+    train_dir = PROJECT / "data/processed/train"
+    class_names = sorted([f.name for f in train_dir.iterdir() if f.is_dir()])
+
+    print("🚀 Running prediction...")
+    result = predict(test_img, class_names)
+    if result:
+        print("✅ Prediction:", result)
+
